@@ -1,30 +1,45 @@
-# NFT Marketplace
+# Monad Bundler Volume Bot
 
-A decentralized NFT marketplace built with Next.js and Hardhat, allowing users to create, buy, and resell NFTs on the blockchain.
+An automated monitoring bot that tracks, analyzes, and reports trading volume data for assets bundled via the Monad blockchain. Provides real-time insights into volume fluctuations, detects anomalies, and sends alerts to help traders, liquidity providers, and project teams track market activity effectively.
+
+### Key Capabilities
+
+- **Real-time Volume Tracking**: Continuously monitors trading volume for selected bundles or assets on the Monad blockchain
+- **Anomaly Detection**: Automatically flags sudden spikes, drops, or unusual patterns in volume activity
+- **Multi-channel Alerts**: Sends notifications via Discord, Telegram, email, or other configured channels when volume thresholds are exceeded
+- **Historical Analytics**: Aggregates and stores volume data over customizable time intervals (hourly, daily, weekly) for trend analysis
+- **Configurable Watchlists**: Monitor specific assets, bundles, or trading pairs based on your requirements
+- **Dashboard Interface**: Web-based dashboard built with Next.js for visualizing volume trends and bot status
+
+The bot integrates with Monad's blockchain infrastructure to fetch real-time transaction data, calculate volume metrics, and maintain a historical database for comprehensive market analysis. It's designed to be lightweight, modular, and easily extensible for custom monitoring requirements.
 
 ## Features
 
-- 🎨 **Create NFTs**: Mint and list your NFTs on the marketplace
-- 💰 **Buy NFTs**: Purchase NFTs from other users
-- 🔄 **Resell NFTs**: Resell your purchased NFTs
-- 📊 **Dashboard**: View your owned NFTs and listed items
-- 🔐 **Web3 Integration**: Connect your wallet using Web3Modal
-- 📦 **IPFS Storage**: NFT metadata stored on IPFS
+- 📊 **Volume Monitoring**: Real-time tracking of bundler volume across configured assets
+- 🔔 **Smart Alerts**: Threshold-based notifications for volume changes, spikes, or anomalies
+- 📈 **Analytics Dashboard**: Web interface for viewing volume trends and statistics
+- 🔍 **Anomaly Detection**: Automatic identification of unusual volume patterns
+- 📝 **Historical Data**: Persistent storage of volume history for trend analysis
+- ⚙️ **Configurable**: Easy setup with configurable watchlists, thresholds, and intervals
+- 🔐 **Web3 Integration**: Direct blockchain interaction via Ethers.js and Hardhat
+- 🚀 **Production Ready**: Built with Next.js for scalable deployment
 
 ## Tech Stack
 
 - **Frontend**: Next.js 11, React 17, Tailwind CSS
 - **Blockchain**: Solidity, Hardhat, Ethers.js
-- **Smart Contracts**: OpenZeppelin ERC721
-- **Wallet**: Web3Modal
-- **Storage**: IPFS (via ipfs-http-client)
+- **Data Storage**: IPFS for metadata, local/cloud database for volume history
+- **Notifications**: Discord/Telegram bot integration (configurable)
+- **Monitoring**: Real-time RPC polling and event listening
+- **Deployment**: Docker support, cloud-ready architecture
 
 ## Prerequisites
 
 - Node.js (v14 or higher)
 - npm or yarn
-- MetaMask or another Web3 wallet
-- IPFS node (or use a public IPFS gateway)
+- Access to Monad blockchain RPC endpoint
+- (Optional) Discord/Telegram bot tokens for notifications
+- (Optional) Database for historical data storage
 
 ## Installation
 
@@ -46,24 +61,86 @@ yarn install
 cp config.example.js config.js
 ```
 
-4. Update `config.js` with your deployed contract addresses (after deployment).
+4. Configure your settings in `config.js`:
+   - Monad RPC endpoint
+   - Assets/bundles to monitor
+   - Volume thresholds
+   - Notification channels
+   - Polling intervals
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file or update `config.js` with the following:
+
+```javascript
+// RPC Configuration
+export const RPC_URL = "https://your-monad-rpc-endpoint.com"
+export const CHAIN_ID = 1337 // Monad chain ID
+
+// Monitoring Configuration
+export const POLLING_INTERVAL = 60000 // 1 minute in milliseconds
+export const VOLUME_THRESHOLD = 1000 // Minimum volume to trigger alerts
+export const PERCENTAGE_CHANGE_THRESHOLD = 50 // % change to trigger alerts
+
+// Watchlist
+export const WATCH_LIST = [
+  "0x...", // Asset addresses or bundle identifiers
+]
+
+// Notification Settings
+export const DISCORD_WEBHOOK_URL = "your-discord-webhook-url"
+export const TELEGRAM_BOT_TOKEN = "your-telegram-bot-token"
+export const TELEGRAM_CHAT_ID = "your-telegram-chat-id"
+
+// Database (optional)
+export const DATABASE_URL = "your-database-connection-string"
+```
+
+### Network Configuration
+
+Edit `hardhat.config.js` to configure Monad network:
+
+```javascript
+networks: {
+  monad: {
+    url: process.env.RPC_URL || "https://monad-rpc-endpoint.com",
+    chainId: 1337, // Update with actual Monad chain ID
+    accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+  }
+}
+```
 
 ## Development
 
-### Running the Development Server
+### Running the Bot
 
-Start the Next.js development server:
+Start the monitoring bot:
 ```bash
 npm run dev
 # or
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The bot will:
+1. Connect to the Monad blockchain via RPC
+2. Start monitoring configured assets/bundles
+3. Begin tracking volume data
+4. Send alerts when thresholds are exceeded
+
+### Running the Dashboard
+
+Start the Next.js dashboard:
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
 
 ### Compiling Smart Contracts
 
-Compile the Solidity contracts:
+If using smart contracts for data aggregation:
 ```bash
 npx hardhat compile
 ```
@@ -75,62 +152,48 @@ Run the test suite:
 npx hardhat test
 ```
 
-### Deploying Smart Contracts
+## Usage
 
-#### Local Deployment (Hardhat Network)
+### Basic Monitoring
 
-1. Start a local Hardhat node:
-```bash
-npx hardhat node
-```
+1. **Configure Watchlist**: Add asset addresses or bundle identifiers to monitor in `config.js`
+2. **Set Thresholds**: Configure volume and percentage change thresholds
+3. **Start Bot**: Run `npm run dev` to begin monitoring
+4. **View Dashboard**: Access the web dashboard at `http://localhost:3000`
 
-2. In a new terminal, deploy the contracts:
-```bash
-npx hardhat run scripts/deploy.js --network localhost
-```
+### Alert Configuration
 
-The deployment script will automatically update `config.js` with the deployed contract address.
+The bot can send alerts when:
+- Volume exceeds a specified threshold
+- Volume changes by a certain percentage
+- Anomalies are detected in volume patterns
+- Custom conditions are met
 
-#### Polygon Mumbai Testnet
+### Dashboard Features
 
-1. Update `hardhat.config.js` to uncomment the Mumbai network configuration
-2. Set your private key in environment variables:
-```bash
-export privateKey=your_private_key_here
-```
-
-3. Deploy to Mumbai:
-```bash
-npx hardhat run scripts/deploy.js --network mumbai
-```
-
-4. Update `config.js` with the deployed contract address.
-
-#### Polygon Mainnet
-
-1. Update `hardhat.config.js` to uncomment the Polygon mainnet configuration
-2. Set your private key in environment variables
-3. Deploy to mainnet:
-```bash
-npx hardhat run scripts/deploy.js --network matic
-```
-
-4. Update `config.js` with the deployed contract address.
+- **Real-time Volume Display**: See current volume for all monitored assets
+- **Historical Charts**: View volume trends over time
+- **Alert History**: Review past alerts and notifications
+- **Configuration Panel**: Update monitoring settings from the UI
 
 ## Project Structure
 
 ```
 monad-bundler-volume-bot/
-├── contracts/           # Solidity smart contracts
+├── contracts/           # Solidity smart contracts (if needed)
 │   └── NFTMarketplace.sol
-├── pages/              # Next.js pages
-│   ├── index.js        # Home/Marketplace page
-│   ├── create-nft.js   # Create NFT page
-│   ├── my-nfts.js      # My NFTs page
-│   ├── resell-nft.js   # Resell NFT page
-│   └── dashboard.js    # Dashboard page
-├── scripts/            # Deployment scripts
-│   └── deploy.js
+├── pages/              # Next.js dashboard pages
+│   ├── index.js        # Main dashboard
+│   ├── dashboard.js    # Volume analytics dashboard
+│   ├── create-nft.js   # Asset configuration (if applicable)
+│   ├── my-nfts.js      # Monitored assets view
+│   └── resell-nft.js   # Alert configuration
+├── scripts/            # Bot scripts and utilities
+│   └── deploy.js       # Deployment scripts
+├── services/           # Core bot services
+│   ├── volume-tracker.js    # Volume monitoring logic
+│   ├── anomaly-detector.js  # Anomaly detection
+│   └── notifier.js          # Alert sending
 ├── styles/            # CSS styles
 ├── public/            # Static assets
 ├── config.example.js  # Example configuration
@@ -138,54 +201,66 @@ monad-bundler-volume-bot/
 └── package.json       # Dependencies
 ```
 
-## Smart Contract
+## Monitoring Logic
 
-The `NFTMarketplace` contract is an ERC721 token contract that includes marketplace functionality:
+The bot operates on the following principles:
 
-- **createToken**: Mint a new NFT and list it on the marketplace
-- **createMarketSale**: Purchase an NFT from the marketplace
-- **resellToken**: Resell a purchased NFT
-- **fetchMarketItems**: Get all unsold items
-- **fetchMyNFTs**: Get NFTs owned by the caller
-- **fetchItemsListed**: Get items listed by the caller
+1. **Data Collection**: Polls Monad blockchain RPC endpoints at configured intervals
+2. **Volume Calculation**: Aggregates transaction volumes for monitored assets
+3. **Pattern Analysis**: Compares current volume against historical baselines
+4. **Alert Triggering**: Sends notifications when configured conditions are met
+5. **Data Storage**: Persists volume data for historical analysis
 
-The contract charges a listing fee (default: 0.025 ETH) for each listing.
+## Deployment
 
-## Usage
+### Local Deployment
 
-1. **Connect Wallet**: Click the connect button and select your wallet
-2. **Create NFT**: 
-   - Go to the "Create NFT" page
-   - Upload your image (stored on IPFS)
-   - Enter name, description, and price
-   - Pay the listing fee and mint your NFT
-3. **Buy NFT**: 
-   - Browse available NFTs on the homepage
-   - Click "Buy" on any NFT
-   - Confirm the transaction in your wallet
-4. **View Your NFTs**: 
-   - Go to "My NFTs" to see your purchased NFTs
-   - Go to "Dashboard" to see your listed items
-5. **Resell NFT**: 
-   - Select an NFT from "My NFTs"
-   - Set a new price and pay the listing fee
+1. Configure your settings in `config.js`
+2. Start the bot: `npm run dev`
+3. Access dashboard at `http://localhost:3000`
 
-## Configuration
+### Production Deployment
 
-### Network Configuration
+1. Build the application:
+```bash
+npm run build
+```
 
-Edit `hardhat.config.js` to configure networks:
+2. Start production server:
+```bash
+npm start
+```
 
-- **Hardhat**: Local development network (chainId: 1337)
-- **Mumbai**: Polygon Mumbai testnet
-- **Matic**: Polygon mainnet
+3. Use process managers like PM2 for long-running operation:
+```bash
+pm2 start npm --name "monad-volume-bot" -- start
+```
 
-### Contract Addresses
+### Docker Deployment
 
-After deployment, update `config.js` with your contract addresses:
+```bash
+docker build -t monad-volume-bot .
+docker run -d --env-file .env monad-volume-bot
+```
+
+## Configuration Examples
+
+### Monitoring Specific Assets
 
 ```javascript
-export const marketplaceAddress = "0x..."
+export const WATCH_LIST = [
+  "0x1234...", // Token A
+  "0x5678...", // Token B
+  "0x9abc...", // Bundle contract
+]
+```
+
+### Alert Thresholds
+
+```javascript
+export const VOLUME_THRESHOLD = 10000 // Alert if volume > 10,000
+export const PERCENTAGE_CHANGE_THRESHOLD = 25 // Alert if volume changes > 25%
+export const SPIKE_DETECTION = true // Enable anomaly detection
 ```
 
 ## Building for Production
@@ -206,6 +281,26 @@ npm start
 yarn start
 ```
 
+## Troubleshooting
+
+### Bot Not Connecting
+
+- Verify RPC endpoint is accessible
+- Check network configuration in `hardhat.config.js`
+- Ensure chain ID matches Monad network
+
+### Alerts Not Sending
+
+- Verify notification credentials (Discord webhook, Telegram token)
+- Check bot permissions
+- Review alert threshold settings
+
+### Volume Data Not Updating
+
+- Verify polling interval configuration
+- Check RPC endpoint rate limits
+- Review asset addresses in watchlist
+
 ## License
 
 See [LICENSE.txt](LICENSE.txt) for details.
@@ -217,4 +312,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 For issues and questions, please open an issue on the repository.
-
